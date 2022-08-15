@@ -79,10 +79,14 @@ export default class GesturePassword extends Component {
       outerCircle,
       transparentLine,
       children,
+      messageStyle,
+      boardStyle,
     } = this.props;
 
     return (
       <Container
+        messageStyle={messageStyle}
+        boardStyle={boardStyle}
         textStyle={textStyle}
         style={style}
         status={status}
@@ -315,6 +319,8 @@ GesturePassword.defaultProps = {
 
 const Container = memo(
   ({
+    messageStyle,
+    boardStyle,
     textStyle,
     style,
     status,
@@ -336,10 +342,10 @@ const Container = memo(
 
     return (
       <View style={_styleContainer}>
-        <View style={styles.message}>
+        <View style={[styles.message,messageStyle]}>
           <Text style={_styleText}>{message}</Text>
         </View>
-        <View style={styles.board} {...panHandlers}>
+        <View style={[styles.board,boardStyle]} {...panHandlers}>
           {children}
         </View>
         {userAddedChildren}
