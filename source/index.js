@@ -29,15 +29,18 @@ export default class GesturePassword extends Component {
     this.state = {
       circles: circles,
       lines: [],
-      width:Width,
-      height:Width,
       pageX:0,
       pageY:0,
     };
   }
 
-  getCircles() {
-    let {width, height} = this.state;
+  UNSAFE_componentWillReceiveProps(nextProps) {
+    if(this.props.width != nextProps.width) {
+      this.setState({circles:this.getCircles(nextProps)})
+    }
+  }
+  getCircles(props) {
+    let {width, height} = props;
     if(!width) width = Width;
     if(!height) height = Width;
     const radius =  width / 10;
@@ -58,9 +61,11 @@ export default class GesturePassword extends Component {
   }
 
   onLayout(e, ref) {
-    ref.current?.measure((x,y,width,height,pageX,pageY)=>{
-      this.setState({pageX,pageY,width,height});
-    })
+    setTimeout(()=>{
+      ref.current?.measure((x,y,width,height,pageX,pageY)=>{
+        this.setState({pageX,pageY});
+      });
+    }, 500);
   }
   _panResponder = PanResponder.create({
     // 要求成为响应者：
@@ -195,6 +200,8 @@ export default class GesturePassword extends Component {
 
     let x = e.nativeEvent.pageX - this.state.pageX;
     let y = e.nativeEvent.pageY - this.state.pageY;
+
+    console.log('###$$$onStart',e.nativeEvent.pageX,this.state.pageX)
 
     let lastChar = this.getTouchChar({ x, y });
 
