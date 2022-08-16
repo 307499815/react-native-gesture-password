@@ -1,5 +1,5 @@
 import * as helper from "./helper";
-import React, { Component, memo, useMemo } from "react";
+import React, { Component, memo, useMemo, useRef } from "react";
 import {
   StyleSheet,
   PanResponder,
@@ -14,9 +14,6 @@ import PropTypes from "prop-types";
 
 const Width = Dimensions.get("window").width;
 const Height = Dimensions.get("window").height;
-const isVertical = Height > Width;
-const Top = isVertical ? ((Height - Width) / 2.0) * 1.25 : 10;
-const Radius = isVertical ? Width / 10 : Width / 25;
 
 export default class GesturePassword extends Component {
   constructor(props) {
@@ -28,22 +25,42 @@ export default class GesturePassword extends Component {
     this.isMoving = false;
 
     // getInitialState
-    let circles = [];
-    let Margin = Radius;
+    let circles = this.getCircles(props)||[];
+    this.state = {
+      circles: circles,
+      lines: [],
+      width:Width,
+      height:Width,
+      pageX:0,
+      pageY:0,
+    };
+  }
+
+  getCircles() {
+    let {width, height} = this.state;
+    if(!width) width = Width;
+    if(!height) height = Width;
+    const radius =  width / 10;
+
+    let margin = radius;
+    const circles = [];
     for (let i = 0; i < 9; i++) {
       let p = i % 3;
       let q = parseInt(i / 3);
       circles.push({
         isActive: false,
-        x: p * (Radius * 2 + Margin) + Margin + Radius,
-        y: q * (Radius * 2 + Margin) + Margin + Radius,
+        x: p * (radius * 2 + radius) + margin + radius,
+        y: q * (radius * 2 + radius) + margin + radius,
+        r: radius,
       });
     }
+    return circles;
+  }
 
-    this.state = {
-      circles: circles,
-      lines: [],
-    };
+  onLayout(e, ref) {
+    ref.current?.measure((x,y,width,height,pageX,pageY)=>{
+      this.setState({pageX,pageY,width,height});
+    })
   }
   _panResponder = PanResponder.create({
     // 要求成为响应者：
@@ -95,6 +112,7 @@ export default class GesturePassword extends Component {
         rightColor={rightColor}
         panHandlers={this._panResponder.panHandlers}
         userAddedChildren={children}
+        onLayout={(e,ref)=>this.onLayout(e,ref)}
       >
         <Circles
           circles={this.state.circles}
@@ -140,7 +158,8 @@ export default class GesturePassword extends Component {
     let y = touch.y;
 
     for (let i = 0; i < 9; i++) {
-      if (helper.isPointInCircle({ x, y }, this.state.circles[i], Radius)) {
+      const c = this.state.circles[i];
+      if (helper.isPointInCircle({ x, y }, c, c.r)) {
         return String(i);
       }
     }
@@ -174,12 +193,8 @@ export default class GesturePassword extends Component {
     this.lastIndex = -1;
     this.isMoving = false;
 
-    let x = isVertical
-      ? e.nativeEvent.pageX
-      : e.nativeEvent.pageX - Width / 3.4;
-    let y = isVertical
-      ? e.nativeEvent.pageY - Top / 1.5
-      : e.nativeEvent.pageY - 30;
+    let x = e.nativeEvent.pageX - this.state.pageX;
+    let y = e.nativeEvent.pageY - this.state.pageY;
 
     let lastChar = this.getTouchChar({ x, y });
 
@@ -202,27 +217,24 @@ export default class GesturePassword extends Component {
       if (this.props.interval > 0) {
         clearTimeout(this.timer);
       }
+
     }
   };
 
   onMove = (e, g) => {
     if (this.isMoving) {
-      let x = isVertical
-        ? e.nativeEvent.pageX
-        : e.nativeEvent.pageX - Width / 3.4;
-      let y = isVertical
-        ? e.nativeEvent.pageY - Top / 1.5
-        : e.nativeEvent.pageY - 30;
+      let x = e.nativeEvent.pageX - this.state.pageX;
+      let y = e.nativeEvent.pageY - this.state.pageY;
 
       this.refs.line.setNativeProps({ end: { x, y } });
 
       let lastChar = null;
-
+      const lastCircle = this.state.circles[this.lastIndex];
       if (
         !helper.isPointInCircle(
           { x, y },
-          this.state.circles[this.lastIndex],
-          Radius,
+          lastCircle,
+          lastCircle.r,
         )
       ) {
         lastChar = this.getTouchChar({ x, y });
@@ -330,6 +342,7 @@ const Container = memo(
     panHandlers,
     children,
     userAddedChildren,
+    onLayout
   }) => {
     let color = status === "wrong" ? wrongColor : rightColor;
 
@@ -339,13 +352,15 @@ const Container = memo(
       () => [styles.msgText, textStyle, { color: color }],
       [textStyle, color],
     );
-
+    
+    const boardRef = useRef(null);
+    
     return (
       <View style={_styleContainer}>
         <View style={[styles.message,messageStyle]}>
           <Text style={_styleText}>{message}</Text>
         </View>
-        <View style={[styles.board,boardStyle]} {...panHandlers}>
+        <View style={[styles.board,boardStyle]} {...panHandlers} ref={boardRef} onLayout={(e)=>onLayout(e, boardRef)}>
           {children}
         </View>
         {userAddedChildren}
@@ -393,7 +408,7 @@ const Circles = memo(
           color={color}
           x={c.x}
           y={c.y}
-          r={Radius}
+          r={c.r}
           inner={inner}
           outer={outer}
         />
@@ -411,17 +426,17 @@ const styles = StyleSheet.create({
   board: {
     flexDirection: I18nManager.isRTL ? "row-reverse" : "row",
     position: "absolute",
-    left: isVertical ? 0 : Width / 3.4,
-    top: isVertical ? Top / 1.5 : 30,
+    left: 0,
+    top: 50,
     width: Width,
     height: Height,
   },
   message: {
     position: "absolute",
     left: 0,
-    top: 20,
+    top: 10,
     width: Width,
-    height: Top / 3,
+    height: 40,
     alignItems: "center",
     justifyContent: "center",
   },
