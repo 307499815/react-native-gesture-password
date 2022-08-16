@@ -39,6 +39,13 @@ export default class GesturePassword extends Component {
       this.setState({circles:this.getCircles(nextProps)})
     }
   }
+
+  componentWillUnmount() {
+    if(this.timer) {
+      clearTimeout(this.timer);
+      this.timer = null;
+    }
+  }
   getCircles(props) {
     let {width, height} = props;
     if(!width) width = Width;
@@ -201,8 +208,6 @@ export default class GesturePassword extends Component {
     let x = e.nativeEvent.pageX - this.state.pageX;
     let y = e.nativeEvent.pageY - this.state.pageY;
 
-    console.log('###$$$onStart',e.nativeEvent.pageX,this.state.pageX)
-
     let lastChar = this.getTouchChar({ x, y });
 
     if (lastChar) {
@@ -221,8 +226,9 @@ export default class GesturePassword extends Component {
 
       this.props.onStart && this.props.onStart();
 
-      if (this.props.interval > 0) {
+      if (this.props.interval > 0 && this.timer) {
         clearTimeout(this.timer);
+        this.timer = null;
       }
 
     }
@@ -304,7 +310,10 @@ export default class GesturePassword extends Component {
     this.props.onEnd && this.props.onEnd(password);
 
     if (this.props.interval > 0) {
-      this.timer = setTimeout(() => this.resetActive(), this.props.interval);
+      this.timer = setTimeout(() => {
+        this.timer = null;
+        this.resetActive();
+      }, this.props.interval);
     }
   };
 }
