@@ -178,7 +178,7 @@ export default class GesturePassword extends Component {
       ? e.nativeEvent.pageX
       : e.nativeEvent.pageX - Width / 3.4;
     let y = isVertical
-      ? e.nativeEvent.pageY - Top / 1.25
+      ? e.nativeEvent.pageY - Top / 1.5
       : e.nativeEvent.pageY - 30;
 
     let lastChar = this.getTouchChar({ x, y });
@@ -211,7 +211,7 @@ export default class GesturePassword extends Component {
         ? e.nativeEvent.pageX
         : e.nativeEvent.pageX - Width / 3.4;
       let y = isVertical
-        ? e.nativeEvent.pageY - Top / 1.25
+        ? e.nativeEvent.pageY - Top / 1.5
         : e.nativeEvent.pageY - 30;
 
       this.refs.line.setNativeProps({ end: { x, y } });
