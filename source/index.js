@@ -32,6 +32,8 @@ export default class GesturePassword extends Component {
       pageX:0,
       pageY:0,
     };
+
+    this.logs = [];
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
@@ -46,6 +48,17 @@ export default class GesturePassword extends Component {
       this.timer = null;
     }
   }
+
+  getLogs() {
+    return this.logs || [];
+  }
+
+  addLog(log) {
+    const logs = this.logs || [];
+    logs.push(log);
+    this.logs = logs;
+  }
+
   getCircles(props) {
     let {width, height} = props;
     if(!width) width = Width;
@@ -71,6 +84,7 @@ export default class GesturePassword extends Component {
     setTimeout(()=>{
       ref.current?.measure((x,y,width,height,pageX,pageY)=>{
         this.setState({pageX,pageY});
+        this.addLog(`onMeasure:${Math.floor(pageX)},${Math.floor(pageY)},${Math.floor(width)},${Math.floor(height)}`);
       });
     }, 500);
   }
@@ -208,6 +222,7 @@ export default class GesturePassword extends Component {
     let x = e.nativeEvent.pageX - this.state.pageX;
     let y = e.nativeEvent.pageY - this.state.pageY;
 
+    this.addLog(`onStart:${Math.floor(x)},${Math.floor(y)}`);
     let lastChar = this.getTouchChar({ x, y });
 
     if (lastChar) {
@@ -216,6 +231,7 @@ export default class GesturePassword extends Component {
       this.sequence = lastChar;
       this.resetActive();
       this.setActive(this.lastIndex);
+      this.addLog(`onNumber:${Math.floor(x)},${Math.floor(y)},${lastChar}`);
 
       let point = {
         x: this.state.circles[this.lastIndex].x,
@@ -260,6 +276,7 @@ export default class GesturePassword extends Component {
           if (crossChar && this.sequence.indexOf(crossChar) === -1) {
             this.sequence += crossChar;
             this.setActive(Number(crossChar));
+            this.addLog(`onCross:${Math.floor(x)},${Math.floor(y)},${crossChar}`);
           }
         }
 
@@ -284,6 +301,7 @@ export default class GesturePassword extends Component {
         this.sequence += lastChar;
 
         this.setActive(this.lastIndex);
+        this.addLog(`onNumber:${Math.floor(x)},${Math.floor(y)},${lastChar}`);
 
         let point = {
           x: this.state.circles[this.lastIndex].x,
