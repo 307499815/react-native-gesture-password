@@ -219,8 +219,8 @@ export default class GesturePassword extends Component {
     this.lastIndex = -1;
     this.isMoving = false;
 
-    let x = e.nativeEvent.locationX - this.state.pageX;
-    let y = e.nativeEvent.locationY - this.state.pageY;
+    let x = e.nativeEvent.locationX; // - this.state.pageX;
+    let y = e.nativeEvent.locationY; //  - this.state.pageY;
 
     this.addLog(`onStart:${Math.floor(x)},${Math.floor(y)}`);
     let lastChar = this.getTouchChar({ x, y });
@@ -396,7 +396,7 @@ const Container = memo(
         </View>
         <View style={[styles.board,boardStyle]} ref={boardRef}>
           {children}
-          <View style={{position:'absolute',top:0,left:0,right:0,bottom:0}} {...panHandlers}/>
+          <View style={{position:'absolute',top:0,left:0,right:0,bottom:0}} {...panHandlers} collapsable={false}/>
         </View>
         {userAddedChildren}
       </View>
