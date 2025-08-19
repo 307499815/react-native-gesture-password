@@ -34,6 +34,7 @@ export default class GesturePassword extends Component {
     };
 
     this.logs = [];
+    this.line = React.createRef();
   }
 
   UNSAFE_componentWillReceiveProps(nextProps) {
@@ -156,7 +157,7 @@ export default class GesturePassword extends Component {
           rightColor={rightColor}
           transparentLine={transparentLine}
         />
-        <Line ref="line" color={transparentLine ? "#00000000" : color} />
+        <Line ref={this.line} color={transparentLine ? "#00000000" : color} />
       </Container>
     );
   }
@@ -238,7 +239,7 @@ export default class GesturePassword extends Component {
         y: this.state.circles[this.lastIndex].y,
       };
 
-      this.refs.line.setNativeProps({ start: point, end: point });
+      this.line.current?.setNativeProps({ start: point, end: point });
 
       this.props.onStart && this.props.onStart();
 
@@ -255,7 +256,7 @@ export default class GesturePassword extends Component {
       let x = e.nativeEvent.locationX - this.state.pageX;
       let y = e.nativeEvent.locationY - this.state.pageY;
 
-      this.refs.line.setNativeProps({ end: { x, y } });
+      this.line.current?.setNativeProps({ end: { x, y } });
 
       let lastChar = null;
       const lastCircle = this.state.circles[this.lastIndex];
@@ -308,7 +309,7 @@ export default class GesturePassword extends Component {
           y: this.state.circles[this.lastIndex].y,
         };
 
-        this.refs.line.setNativeProps({ start: point });
+        this.line.current?.setNativeProps({ start: point });
       }
     }
 
@@ -323,7 +324,7 @@ export default class GesturePassword extends Component {
     this.isMoving = false;
 
     let origin = { x: 0, y: 0 };
-    this.refs.line.setNativeProps({ start: origin, end: origin });
+    this.line.current?.setNativeProps({ start: origin, end: origin });
 
     this.props.onEnd && this.props.onEnd(password);
 
