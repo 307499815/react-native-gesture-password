@@ -7,6 +7,7 @@ export default class Line extends PureComponent {
     super(props);
 
     this.state = { ...props };
+    this.line = React.createRef();
   }
 
   setNativeProps(props) {
@@ -38,7 +39,7 @@ export default class Line extends PureComponent {
 
     return (
       <View
-        ref="line"
+        ref={this.line}
         style={[
           styles.line,
           {

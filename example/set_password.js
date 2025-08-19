@@ -18,6 +18,8 @@ class AppDemo extends Component {
             message: 'Please input your password.',
             status: 'normal'
         }
+
+        this.pg = React.createRef();
     }
 
     onEnd(password) {
@@ -62,7 +64,7 @@ class AppDemo extends Component {
     render() {
         return (
             <PasswordGesture
-                ref='pg'
+                ref={this.pg}
                 status={this.state.status}
                 message={this.state.message}
                 onStart={() => this.onStart()}

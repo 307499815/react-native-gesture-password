@@ -91,6 +91,7 @@ var PasswordGesture = require('react-native-gesture-password');
 
 var Password1 = '';
 var AppDemo = React.createClass({
+    pg:React.createRef(),
     // Example for check password
     onEnd: function(password) {
         if (password == '123') {
@@ -169,7 +170,7 @@ var AppDemo = React.createClass({
     render: function() {
         return (
             <PasswordGesture
-                ref='pg'
+                ref={this.pg}
                 status={this.state.status}
                 message={this.state.message}
                 onStart={() => this.onStart()}
